@@ -4,13 +4,21 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useRouterState,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
+import { motion, AnimatePresence } from "motion/react";
+import { Toaster } from "sonner";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { LanguageProvider } from "../lib/language";
+import { Navbar } from "../components/Navbar";
+import { Footer } from "../components/Footer";
+import { GoldDust } from "../components/GoldDust";
+import { CustomCursor } from "../components/CustomCursor";
 
 function NotFoundComponent() {
   return (
