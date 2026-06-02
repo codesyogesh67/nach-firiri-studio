@@ -85,14 +85,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: "Nach Firiri — South Asian Dance Studio" },
+      { name: "description", content: "Nach Firiri — Nepali & South Asian dance workshops, tutorials, private bookings, and Newari-inspired fashion with Swastika." },
+      { name: "author", content: "Swastika Sah" },
+      { property: "og:title", content: "Nach Firiri — Dance. Feel. Belong." },
+      { property: "og:description", content: "Workshops, tutorials, private bookings, and South Asian fashion." },
       { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
-      { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:site", content: "@swasksah" },
     ],
     links: [
       {
