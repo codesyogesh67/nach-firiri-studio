@@ -123,11 +123,42 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
+      <LanguageProvider>
+        <CustomCursor />
+        <GoldDust />
+        <Navbar />
+        <main className="relative z-10 min-h-screen">
+          {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={pathname}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -12 }}
+              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <Outlet />
+            </motion.div>
+          </AnimatePresence>
+        </main>
+        <Footer />
+        <Toaster
+          theme="dark"
+          position="top-center"
+          toastOptions={{
+            style: {
+              background: "oklch(0.16 0.01 30)",
+              border: "1px solid oklch(0.74 0.11 85 / 0.4)",
+              color: "oklch(0.95 0.018 80)",
+            },
+          }}
+        />
+      </LanguageProvider>
     </QueryClientProvider>
   );
 }
+
