@@ -1,7 +1,11 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "nach-firiri-studio",
-  "compatibility_date": "2026-06-02",
+  "name": "brooklyn-hearth-project-75",
+  "compatibility_date": "2025-09-24",
   "compatibility_flags": ["nodejs_compat"],
-  "observability": { "enabled": true }
+  "main": "src/server.ts",
+  "assets": {
+    "directory": "dist/client",
+    "binding": "ASSETS"
+  }
 }
