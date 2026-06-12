@@ -37,6 +37,29 @@ function WorkshopsPage() {
     [city],
   );
 
+  // Add this function inside WorkshopsPage component
+const handleBookNow = async (w: typeof WORKSHOPS[number]) => {
+  try {
+    const res = await fetch(
+      "https://kcwshieovehgpdhahowq.supabase.co/functions/v1/create-checkout-session",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          workshop_id: w.id,
+          workshop_name: w.style,
+          workshop_date: w.date,
+          price_id: w.priceId,
+        }),
+      }
+    );
+    const { url } = await res.json();
+    window.location.href = url; // redirect to Stripe checkout
+  } catch {
+    toast.error("Something went wrong. Please try again.");
+  }
+};
+
   return (
     <>
       <PageHero label="Workshops" title="Join the Movement" deva="नाच फिरिरी">
@@ -118,7 +141,7 @@ function WorkshopsPage() {
                           Join Waitlist
                         </Button>
                       ) : (
-                        <Button variant="gold" size="lg" onClick={() => { window.open(w.link, "_blank"); setBooked(w); }}>
+                        <Button variant="gold" size="lg" onClick={() => handleBookNow(w)}>
                           Book Now
                         </Button>
                       )}
