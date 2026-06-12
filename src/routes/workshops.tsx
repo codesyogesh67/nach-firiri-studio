@@ -56,8 +56,9 @@ const handleBookNow = async (w: typeof WORKSHOPS[number]) => {
       }
     );
     const data = await res.json();
-    console.log("Edge function response:", data); // add this
-    window.location.href = data.url;
+  console.log("Full response:", data);
+console.log("URL value:", data.url);
+window.location.href = data.url;
   } catch (err) {
     console.error("Error:", err);
     toast.error("Something went wrong. Please try again.");
