@@ -37,14 +37,16 @@ function WorkshopsPage() {
     [city],
   );
 
-  // Add this function inside WorkshopsPage component
 const handleBookNow = async (w: typeof WORKSHOPS[number]) => {
   try {
     const res = await fetch(
       "https://kcwshieovehgpdhahowq.supabase.co/functions/v1/create-checkout-session",
       {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtjd3NoaWVvdmVoZ3BkaGFob3dxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyODY2MDcsImV4cCI6MjA5Njg2MjYwN30.iia9Uuzzg5V7l4mG4pqbitshV7zdLjtw3JxCOJCYwD8", // add this
+        },
         body: JSON.stringify({
           workshop_id: w.id,
           workshop_name: w.style,
@@ -53,9 +55,11 @@ const handleBookNow = async (w: typeof WORKSHOPS[number]) => {
         }),
       }
     );
-    const { url } = await res.json();
-    window.location.href = url; // redirect to Stripe checkout
-  } catch {
+    const data = await res.json();
+    console.log("Edge function response:", data); // add this
+    window.location.href = data.url;
+  } catch (err) {
+    console.error("Error:", err);
     toast.error("Something went wrong. Please try again.");
   }
 };
