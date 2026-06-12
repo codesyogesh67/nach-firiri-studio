@@ -49,7 +49,7 @@ const handleBookNow = async (w: typeof WORKSHOPS[number]) => {
           workshop_id: w.id,
           workshop_name: w.style,
           workshop_date: w.date,
-          price_id: w.priceId,
+          price_id: "price_1ThcrxQ4li0j4IaZq7eoDSWY",
         }),
       }
     );
