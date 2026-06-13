@@ -128,39 +128,38 @@ function AdminPage() {
     URL.revokeObjectURL(url);
   };
 
-  // Add workshop
   const handleAddWorkshop = async () => {
-    if (!form.style || !form.date || !form.venue || !form.city) {
-      setSaveMsg("Please fill in all required fields.");
-      return;
-    }
-    setSaving(true);
-    setSaveMsg("");
+  if (!form.style || !form.date || !form.venue || !form.city) {
+    setSaveMsg("Please fill in all required fields.");
+    return;
+  }
+  setSaving(true);
+  setSaveMsg("");
 
-    const newWorkshop = {
-      ...form,
-      id: `w${Date.now()}`,
-      spots_left: form.spots_total,
-      active: true,
-    };
-
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/workshops`, {
+  const res = await fetch(
+    `${SUPABASE_URL}/functions/v1/create-workshop`,
+    {
       method: "POST",
-      headers: { ...headers, "Prefer": "return=minimal" },
-      body: JSON.stringify(newWorkshop),
-    });
-
-    if (res.ok) {
-      setSaveMsg("✅ Workshop added successfully!");
-      setForm(EMPTY_FORM);
-      setShowAddForm(false);
-      fetchData();
-    } else {
-      setSaveMsg("❌ Something went wrong. Try again.");
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+      },
+      body: JSON.stringify(form),
     }
-    setSaving(false);
-  };
+  );
 
+  const data = await res.json();
+
+  if (data.success) {
+    setSaveMsg("✅ Workshop added successfully!");
+    setForm(EMPTY_FORM);
+    setShowAddForm(false);
+    fetchData();
+  } else {
+    setSaveMsg("❌ Something went wrong. Try again.");
+  }
+  setSaving(false);
+};
   const totalRevenue = bookings.reduce((sum, b) => sum + (b.amount_paid / 100), 0);
 
   if (!authed) {
