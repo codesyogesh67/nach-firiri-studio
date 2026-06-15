@@ -2,11 +2,9 @@ import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
-import { useLang } from "@/lib/language";
 import { cn } from "@/lib/utils";
 
 export function Navbar() {
-  const { lang, setLang, t } = useLang();
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
 
@@ -18,11 +16,11 @@ export function Navbar() {
   }, []);
 
   const links = [
-    { to: "/", label: t("home") },
-    { to: "/workshops", label: t("workshops") },
-    { to: "/learn", label: t("learn") },
-    { to: "/book", label: t("book") },
-    { to: "/shop", label: t("shop") },
+    { to: "/", label: "Home" },
+    { to: "/workshops", label: "Workshops" },
+    { to: "/learn", label: "Learn" },
+    { to: "/book", label: "Book Me" },
+    { to: "/shop", label: "Shop" },
   ] as const;
 
   return (
@@ -54,28 +52,9 @@ export function Navbar() {
               {l.label}
             </Link>
           ))}
-          <div className="flex items-center gap-1 font-mono text-xs">
-            <button
-              onClick={() => setLang("en")}
-              className={cn("px-1 transition-colors", lang === "en" ? "text-[var(--gold)]" : "text-[var(--ivory)]/50 hover:text-[var(--ivory)]")}
-            >
-              EN
-            </button>
-            <span className="text-[var(--ivory)]/30">|</span>
-            <button
-              onClick={() => setLang("ne")}
-              className={cn("font-deva px-1 transition-colors", lang === "ne" ? "text-[var(--gold)]" : "text-[var(--ivory)]/50 hover:text-[var(--ivory)]")}
-            >
-              नेपाली
-            </button>
-          </div>
         </div>
 
-        <button
-          className="text-[var(--gold)] md:hidden"
-          onClick={() => setOpen(true)}
-          aria-label="Open menu"
-        >
+        <button className="text-[var(--gold)] md:hidden" onClick={() => setOpen(true)} aria-label="Open menu">
           <Menu className="h-7 w-7" />
         </button>
       </nav>
@@ -111,11 +90,6 @@ export function Navbar() {
                   </Link>
                 </motion.div>
               ))}
-              <div className="mt-6 flex items-center gap-3 font-mono text-sm">
-                <button onClick={() => setLang("en")} className={lang === "en" ? "text-[var(--gold)]" : "text-[var(--ivory)]/50"}>EN</button>
-                <span className="text-[var(--ivory)]/30">|</span>
-                <button onClick={() => setLang("ne")} className={cn("font-deva", lang === "ne" ? "text-[var(--gold)]" : "text-[var(--ivory)]/50")}>नेपाली</button>
-              </div>
             </div>
           </motion.div>
         )}
