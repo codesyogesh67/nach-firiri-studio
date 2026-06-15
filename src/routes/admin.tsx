@@ -1,13 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, useEffect, useMemo, useRef } from "react";
+import { Link } from "@tanstack/react-router";
+import { useState, useEffect, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "motion/react";
 import {
   Users, DollarSign, Calendar, Mail, X, Plus, Download,
   LogOut, RefreshCw, Search, ChevronDown, ChevronUp,
-  TrendingUp, Clock, MapPin, Music, Edit2, Eye,
+  TrendingUp, Clock, MapPin, Edit2, Eye,
   AlertCircle, BarChart2, List, Grid,
-  Copy, Check, ArrowUpRight, Zap, Sun, Moon
+  Copy, Check, ArrowUpRight, Zap, Sun, Moon, ArrowLeft
 } from "lucide-react";
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -322,6 +323,7 @@ function AdminPage() {
     "--admin-row-hover": "oklch(0.74 0.11 85 / 4%)",
     "--admin-track": "oklch(0.24 0.015 35)",
     "--admin-backdrop": "rgba(0,0,0,0.6)",
+    "--admin-form-bg": "oklch(0.15 0.009 30)",
     "--admin-chart-grid": "rgba(255,255,255,0.04)",
     "--admin-chart-tick": "rgba(245,240,232,0.35)",
     "--admin-tooltip-bg": "#1A1410",
@@ -337,6 +339,7 @@ function AdminPage() {
     "--admin-row-hover": "oklch(0.62 0.12 78 / 5%)",
     "--admin-track": "#E5E7EB",
     "--admin-backdrop": "rgba(0,0,0,0.35)",
+    "--admin-form-bg": "#F8F9FA",
     "--admin-chart-grid": "rgba(0,0,0,0.05)",
     "--admin-chart-tick": "rgba(17,24,39,0.4)",
     "--admin-tooltip-bg": "#1F2937",
@@ -409,25 +412,40 @@ function AdminPage() {
   };
 
   return (
-    <div className="min-h-screen admin-theme pt-20" style={themeVars as React.CSSProperties}>
+    <div className="min-h-screen admin-theme" style={themeVars as React.CSSProperties}>
       <style>{adminCSS}</style>
 
       {/* ── TOP NAV ───────────────────────────────────────────────────── */}
-      <div className="sticky top-20 z-40 admin-topnav border-b">
+      <div className="sticky top-0 z-40 admin-topnav border-b">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-3">
 
-          {/* Logo + tabs */}
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2.5">
-              <div className="admin-icon-wrap flex h-8 w-8 items-center justify-center rounded-lg">
-                <Zap className="h-4 w-4 admin-gold" />
+          {/* Left: Back link + logo + tabs */}
+          <div className="flex items-center gap-2">
+            {/* Back to site */}
+            <Link
+              to="/"
+              className="admin-btn-ghost flex items-center gap-1.5 rounded-xl px-2.5 py-2 font-mono text-xs flex-shrink-0"
+              title="Back to site"
+            >
+              <ArrowLeft className="h-3.5 w-3.5" />
+              <span className="hidden sm:block">Back to site</span>
+            </Link>
+
+            <div className="admin-divider h-5 w-px mx-1 flex-shrink-0" />
+
+            {/* Logo */}
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <div className="admin-icon-wrap flex h-7 w-7 items-center justify-center rounded-lg">
+                <Zap className="h-3.5 w-3.5 admin-gold" />
               </div>
               <div>
                 <p className="font-display text-sm font-semibold admin-text leading-none">Nach Firiri</p>
-                <p className="admin-muted font-mono text-[9px] uppercase tracking-widest mt-0.5">Studio Admin</p>
+                <p className="admin-muted font-mono text-[9px] uppercase tracking-widest mt-0.5">Admin</p>
               </div>
             </div>
-            <div className="hidden sm:flex items-center gap-0.5 ml-3">
+
+            {/* Tabs */}
+            <div className="hidden sm:flex items-center gap-0.5 ml-2">
               {tabs.map(t => (
                 <button
                   key={t.id}
@@ -922,40 +940,67 @@ function AdminPage() {
             </div>
 
             {/* Scrollable body */}
-            <div className="overflow-y-auto flex-1 px-6 py-4 space-y-4">
-              {/* Details */}
-              <div className="admin-form-section rounded-xl p-4 space-y-3">
-                <p className="admin-label mb-2">Workshop Details</p>
-                <InputField label="Workshop Name *" value={form.style} onChange={v => setForm(f => ({ ...f, style: v }))} placeholder="e.g. Nach Firiri Heels" />
-                <InputField label="Song / Theme" value={form.song} onChange={v => setForm(f => ({ ...f, song: v }))} placeholder="e.g. Nach Firiri" />
-                <InputField label="Venue *" value={form.venue} onChange={v => setForm(f => ({ ...f, venue: v }))} placeholder="e.g. Ripley-Grier Studios" />
-                <InputField label="City *" value={form.city} onChange={v => setForm(f => ({ ...f, city: v }))} placeholder="e.g. New York" />
+            <div className="overflow-y-auto flex-1" style={{ background: "var(--admin-form-bg)" }}>
+
+              {/* ── Section: Details ─────────────────────────────── */}
+              <div className="px-6 pt-5 pb-1">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="admin-section-dot" />
+                  <p className="admin-section-label">Workshop Details</p>
+                  <div className="admin-section-line flex-1" />
+                </div>
+                <div className="space-y-3">
+                  <InputField label="Workshop Name *" value={form.style} onChange={v => setForm(f => ({ ...f, style: v }))} placeholder="e.g. Nach Firiri Heels" />
+                  <InputField label="Song / Theme" value={form.song} onChange={v => setForm(f => ({ ...f, song: v }))} placeholder="e.g. Nach Firiri" />
+                  <div className="grid grid-cols-2 gap-3">
+                    <InputField label="Venue *" value={form.venue} onChange={v => setForm(f => ({ ...f, venue: v }))} placeholder="e.g. Ripley-Grier Studios" />
+                    <InputField label="City *" value={form.city} onChange={v => setForm(f => ({ ...f, city: v }))} placeholder="e.g. New York" />
+                  </div>
+                </div>
               </div>
 
-              {/* Schedule */}
-              <div className="admin-form-section rounded-xl p-4 space-y-3">
-                <p className="admin-label mb-2">Schedule</p>
-                <div className="grid grid-cols-2 gap-3">
-                  <InputField label="Date *" value={form.date} onChange={v => setForm(f => ({ ...f, date: v }))} placeholder="July 18, 2026" />
-                  <InputField label="Time *" value={form.time} onChange={v => setForm(f => ({ ...f, time: v }))} placeholder="7:00–9:00 PM" />
+              <div className="admin-form-divider mx-6 my-5" />
+
+              {/* ── Section: Schedule ────────────────────────────── */}
+              <div className="px-6 pb-1">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="admin-section-dot" />
+                  <p className="admin-section-label">Schedule</p>
+                  <div className="admin-section-line flex-1" />
                 </div>
-                <InputField label="Duration" value={form.duration} onChange={v => setForm(f => ({ ...f, duration: v }))} placeholder="2 Hours" />
+                <div className="space-y-3">
+                  <div className="grid grid-cols-2 gap-3">
+                    <InputField label="Date *" value={form.date} onChange={v => setForm(f => ({ ...f, date: v }))} placeholder="July 18, 2026" />
+                    <InputField label="Time *" value={form.time} onChange={v => setForm(f => ({ ...f, time: v }))} placeholder="7:00–9:00 PM" />
+                  </div>
+                  <InputField label="Duration" value={form.duration} onChange={v => setForm(f => ({ ...f, duration: v }))} placeholder="2 Hours" />
+                </div>
               </div>
 
-              {/* Pricing */}
-              <div className="admin-form-section rounded-xl p-4 space-y-3">
-                <p className="admin-label mb-2">Pricing & Capacity</p>
-                <div className="grid grid-cols-2 gap-3">
-                  <InputField label="Price ($)" value={form.price} onChange={v => setForm(f => ({ ...f, price: Number(v) }))} type="number" />
-                  <InputField label="Total Spots" value={form.spots_total} onChange={v => setForm(f => ({ ...f, spots_total: Number(v) }))} type="number" />
+              <div className="admin-form-divider mx-6 my-5" />
+
+              {/* ── Section: Pricing ─────────────────────────────── */}
+              <div className="px-6 pb-5">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="admin-section-dot" />
+                  <p className="admin-section-label">Pricing & Capacity</p>
+                  <div className="admin-section-line flex-1" />
                 </div>
-                <InputField label="Stripe Price ID *" value={form.price_id} onChange={v => setForm(f => ({ ...f, price_id: v }))} placeholder="price_1..." mono />
+                <div className="space-y-3">
+                  <div className="grid grid-cols-2 gap-3">
+                    <InputField label="Price ($)" value={form.price} onChange={v => setForm(f => ({ ...f, price: Number(v) }))} type="number" />
+                    <InputField label="Total Spots" value={form.spots_total} onChange={v => setForm(f => ({ ...f, spots_total: Number(v) }))} type="number" />
+                  </div>
+                  <InputField label="Stripe Price ID *" value={form.price_id} onChange={v => setForm(f => ({ ...f, price_id: v }))} placeholder="price_1..." mono />
+                </div>
               </div>
 
               {saveMsg && (
-                <p className="font-mono text-xs text-center" style={{ color: saveMsg.startsWith("✅") ? "#22c55e" : "#ef4444" }}>
-                  {saveMsg}
-                </p>
+                <div className="px-6 pb-4">
+                  <p className="font-mono text-xs text-center" style={{ color: saveMsg.startsWith("✅") ? "#22c55e" : "#ef4444" }}>
+                    {saveMsg}
+                  </p>
+                </div>
               )}
             </div>
 
@@ -1071,7 +1116,7 @@ const adminCSS = `
   .admin-modal-header { background: var(--admin-surface); border-bottom: 1px solid var(--admin-border); }
   .admin-modal-footer { background: var(--admin-surface); border-top: 1px solid var(--admin-border); }
   .admin-stats-row { background: var(--admin-border); }
-  .admin-form-section { background: var(--admin-input-bg); border: 1px solid var(--admin-border); }
+  .admin-form-section { background: var(--admin-input-bg); border: 1px solid var(--admin-border); position: relative; } .admin-form-section + .admin-form-section { margin-top: 1px; } .admin-divider { background: var(--admin-border); }
   .admin-text { color: var(--admin-text); }
   .admin-muted { color: var(--admin-muted); }
   .admin-gold { color: var(--admin-gold); }
@@ -1112,4 +1157,9 @@ const adminCSS = `
   .badge-red { background: rgba(239,68,68,0.1); color: #ef4444; border-color: rgba(239,68,68,0.2); }
   .badge-blue { background: rgba(59,130,246,0.1); color: #3b82f6; border-color: rgba(59,130,246,0.2); }
   .badge-gold { background: var(--admin-icon-bg); color: var(--admin-gold); border-color: color-mix(in oklch, var(--admin-gold) 30%, transparent); }
+  .admin-form-bg { background: var(--admin-form-bg, var(--admin-input-bg)); }
+  .admin-section-label { font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--admin-gold); font-weight: 600; white-space: nowrap; }
+  .admin-section-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--admin-gold); flex-shrink: 0; }
+  .admin-section-line { height: 1px; background: var(--admin-border); }
+  .admin-form-divider { height: 1px; background: var(--admin-border); }
 `;
