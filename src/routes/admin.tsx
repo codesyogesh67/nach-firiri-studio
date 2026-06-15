@@ -8,30 +8,32 @@ import {
   TrendingUp, Clock, MapPin, Edit2, Eye,
   AlertCircle, BarChart2, List, Grid,
   Copy, Check, ArrowUpRight, Zap, Sun, Moon,
-  ArrowLeft, Home, ChevronRight
+  Home, ChevronRight,
 } from "lucide-react";
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
-  ResponsiveContainer, BarChart, Bar, Cell
+  ResponsiveContainer, BarChart, Bar, Cell,
 } from "recharts";
 import { cn } from "@/lib/utils";
+import { WorkshopForm } from "./WorkshopForm";
+import { WorkshopPanel } from "./WorkshopPanel";
 
 const SUPABASE_URL = "https://kcwshieovehgpdhahowq.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtjd3NoaWVvdmVoZ3BkaGFob3dxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyODY2MDcsImV4cCI6MjA5Njg2MjYwN30.iia9Uuzzg5V7l4mG4pqbitshV7zdLjtw3JxCOJCYwD8";
 const ADMIN_PASSWORD = "nachfiriri2026";
 
-type Booking = {
+export type Booking = {
   id: string; created_at: string; workshop_id: string;
   workshop_name: string; workshop_date: string;
   attendee_name: string; attendee_email: string;
   amount_paid: number; status: string;
 };
-type Workshop = {
+export type Workshop = {
   id: string; style: string; song: string; date: string; time: string;
   venue: string; city: string; duration: string; price: number;
   spots_left: number; spots_total: number; price_id: string; active?: boolean;
 };
-const EMPTY_FORM = {
+export const EMPTY_FORM = {
   id: "", style: "", song: "", date: "", time: "", venue: "", city: "",
   duration: "2 Hours", price: 20, spots_total: 20,
   price_id: "price_1ThcrxQ4li0j4IaZq7eoDSWY",
@@ -44,14 +46,14 @@ export const Route = createFileRoute("/admin")({
 });
 
 // ── helpers ────────────────────────────────────────────────────────────────
-const fmt$ = (cents: number) => `$${(cents / 100).toFixed(2)}`;
-const fmtDate = (iso: string) =>
+export const fmt$ = (cents: number) => `$${(cents / 100).toFixed(2)}`;
+export const fmtDate = (iso: string) =>
   new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 const fmtTime = (iso: string) =>
   new Date(iso).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
 
 // ── Portal Modal ───────────────────────────────────────────────────────────
-function Modal({ children, onClose, wide = false }: { children: React.ReactNode; onClose: () => void; wide?: boolean }) {
+export function Modal({ children, onClose, wide = false }: { children: React.ReactNode; onClose: () => void; wide?: boolean }) {
   useEffect(() => {
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -81,7 +83,7 @@ function Modal({ children, onClose, wide = false }: { children: React.ReactNode;
 }
 
 // ── CopyBtn ────────────────────────────────────────────────────────────────
-function CopyBtn({ text }: { text: string }) {
+export function CopyBtn({ text }: { text: string }) {
   const [copied, setCopied] = useState(false);
   return (
     <button onClick={() => { navigator.clipboard.writeText(text); setCopied(true); setTimeout(() => setCopied(false), 1400); }}
@@ -92,7 +94,7 @@ function CopyBtn({ text }: { text: string }) {
 }
 
 // ── Badge ──────────────────────────────────────────────────────────────────
-function Badge({ status }: { status: string }) {
+export function Badge({ status }: { status: string }) {
   const s = status.toLowerCase();
   const cls: Record<string, string> = {
     paid: "bg-emerald-500/12 text-emerald-400 border-emerald-500/20",
@@ -111,7 +113,7 @@ function Badge({ status }: { status: string }) {
 }
 
 // ── CapBar ─────────────────────────────────────────────────────────────────
-function CapBar({ left, total }: { left: number; total: number }) {
+export function CapBar({ left, total }: { left: number; total: number }) {
   const booked = total - left, pct = total > 0 ? Math.round((booked / total) * 100) : 0;
   const col = left === 0 ? "#f87171" : left <= 3 ? "#fb923c" : "var(--gold)";
   return (
@@ -127,29 +129,10 @@ function CapBar({ left, total }: { left: number; total: number }) {
   );
 }
 
-// ── InputField ─────────────────────────────────────────────────────────────
-function Field({ label, value, onChange, placeholder, type = "text", mono = false, half = false }: {
-  label: string; value: string | number; onChange: (v: string) => void;
-  placeholder?: string; type?: string; mono?: boolean; half?: boolean;
-}) {
-  return (
-    <div className={half ? "flex-1" : "w-full"}>
-      <label className="block text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: "var(--gold)", letterSpacing: "0.1em" }}>{label}</label>
-      <input
-        type={type} placeholder={placeholder} value={value}
-        onChange={e => onChange(e.target.value)}
-        className={cn("a-input w-full rounded-xl px-4 py-3.5 text-sm outline-none transition-all", mono && "font-mono text-xs")}
-        style={{ fontSize: "14px" }}
-      />
-    </div>
-  );
-}
-
 // ── StatCard ───────────────────────────────────────────────────────────────
 function StatCard({ label, value, sub, icon: Icon }: { label: string; value: string | number; sub?: string; icon: React.ElementType }) {
   return (
-    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-      className="a-card rounded-2xl p-5">
+    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="a-card rounded-2xl p-5">
       <div className="flex items-start justify-between mb-4">
         <p className="text-sm font-medium" style={{ color: "var(--tm)" }}>{label}</p>
         <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "var(--ag)" }}>
@@ -184,7 +167,6 @@ function AdminPage() {
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState("");
 
-  // bookings filters
   const [search, setSearch] = useState("");
   const [wFilter, setWFilter] = useState("all");
   const [sFilter, setSFilter] = useState("all");
@@ -237,10 +219,21 @@ function AdminPage() {
 
   const filteredBookings = useMemo(() => {
     let list = [...bookings];
-    if (search) { const q = search.toLowerCase(); list = list.filter(b => b.attendee_name.toLowerCase().includes(q) || b.attendee_email.toLowerCase().includes(q) || b.workshop_name.toLowerCase().includes(q)); }
+    if (search) {
+      const q = search.toLowerCase();
+      list = list.filter(b =>
+        b.attendee_name.toLowerCase().includes(q) ||
+        b.attendee_email.toLowerCase().includes(q) ||
+        b.workshop_name.toLowerCase().includes(q)
+      );
+    }
     if (wFilter !== "all") list = list.filter(b => b.workshop_id === wFilter);
     if (sFilter !== "all") list = list.filter(b => b.status.toLowerCase() === sFilter);
-    list.sort((a, b) => { const av = (a as any)[sort.col] ?? ""; const bv = (b as any)[sort.col] ?? ""; return sort.dir === "asc" ? (av > bv ? 1 : -1) : (av < bv ? 1 : -1); });
+    list.sort((a, b) => {
+      const av = (a as any)[sort.col] ?? "";
+      const bv = (b as any)[sort.col] ?? "";
+      return sort.dir === "asc" ? (av > bv ? 1 : -1) : (av < bv ? 1 : -1);
+    });
     return list;
   }, [bookings, search, wFilter, sFilter, sort]);
 
@@ -248,7 +241,10 @@ function AdminPage() {
     setSort(s => s.col === col ? { col, dir: s.dir === "asc" ? "desc" : "asc" } : { col, dir: "asc" });
 
   const exportCSV = (rows: Booking[], name = "bookings") => {
-    const data = [["Name","Email","Workshop","Date","Amount","Status","Booked At"], ...rows.map(b => [b.attendee_name, b.attendee_email, b.workshop_name, b.workshop_date, fmt$(b.amount_paid), b.status, fmtDate(b.created_at)])];
+    const data = [
+      ["Name", "Email", "Workshop", "Date", "Amount", "Status", "Booked At"],
+      ...rows.map(b => [b.attendee_name, b.attendee_email, b.workshop_name, b.workshop_date, fmt$(b.amount_paid), b.status, fmtDate(b.created_at)]),
+    ];
     const blob = new Blob([data.map(r => r.join(",")).join("\n")], { type: "text/csv" });
     const a = Object.assign(document.createElement("a"), { href: URL.createObjectURL(blob), download: `${name}.csv` });
     a.click(); URL.revokeObjectURL(a.href);
@@ -262,7 +258,11 @@ function AdminPage() {
     setSaving(true); setSaveMsg("");
     try {
       const payload = editWorkshop ? { ...editWorkshop, ...form } : form;
-      const res = await fetch(`${SUPABASE_URL}/functions/v1/create-workshop`, { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${SUPABASE_ANON_KEY}` }, body: JSON.stringify(payload) });
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/create-workshop`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${SUPABASE_ANON_KEY}` },
+        body: JSON.stringify(payload),
+      });
       const data = await res.json();
       if (data.success) { setSaveMsg("✅ Workshop saved!"); closeForm(); fetchData(true); }
       else setSaveMsg("❌ Something went wrong.");
@@ -270,48 +270,37 @@ function AdminPage() {
     setSaving(false);
   };
 
-  // ── Theme vars ────────────────────────────────────────────────────────────
+  // ── Theme vars ─────────────────────────────────────────────────────────
   const D = {
-    "--bg": "#0E0D0C",
-    "--sidebar": "#141312",
-    "--surface": "#1A1917",
-    "--surface2": "#201E1C",
-    "--border": "rgba(255,255,255,0.07)",
-    "--text": "#F2EEE8",
-    "--tm": "rgba(242,238,232,0.45)",
-    "--gold": "#C9A96E",
-    "--ag": "rgba(201,169,110,0.12)",
-    "--track": "rgba(255,255,255,0.08)",
-    "--input-bg": "#1E1C1A",
-    "--form-bg": "#161412",
-    "--hover": "rgba(201,169,110,0.05)",
-    "--chart-grid": "rgba(255,255,255,0.04)",
-    "--chart-tick": "rgba(242,238,232,0.3)",
+    "--bg": "#0E0D0C", "--sidebar": "#141312", "--surface": "#1A1917",
+    "--surface2": "#201E1C", "--border": "rgba(255,255,255,0.07)",
+    "--text": "#F2EEE8", "--tm": "rgba(242,238,232,0.45)",
+    "--gold": "#C9A96E", "--ag": "rgba(201,169,110,0.12)",
+    "--track": "rgba(255,255,255,0.08)", "--input-bg": "#1E1C1A",
+    "--form-bg": "#161412", "--hover": "rgba(201,169,110,0.05)",
+    "--chart-grid": "rgba(255,255,255,0.04)", "--chart-tick": "rgba(242,238,232,0.3)",
     "--tooltip": "#1A1917",
   };
   const L = {
-    "--bg": "#F0F2F5",
-    "--sidebar": "#FFFFFF",
-    "--surface": "#FFFFFF",
-    "--surface2": "#F7F8FA",
-    "--border": "rgba(0,0,0,0.08)",
-    "--text": "#111827",
-    "--tm": "rgba(17,24,39,0.45)",
-    "--gold": "#A07840",
-    "--ag": "rgba(160,120,64,0.1)",
-    "--track": "rgba(0,0,0,0.08)",
-    "--input-bg": "#F3F4F6",
-    "--form-bg": "#F7F8FA",
-    "--hover": "rgba(160,120,64,0.05)",
-    "--chart-grid": "rgba(0,0,0,0.05)",
-    "--chart-tick": "rgba(17,24,39,0.35)",
+    "--bg": "#F0F2F5", "--sidebar": "#FFFFFF", "--surface": "#FFFFFF",
+    "--surface2": "#F7F8FA", "--border": "rgba(0,0,0,0.08)",
+    "--text": "#111827", "--tm": "rgba(17,24,39,0.45)",
+    "--gold": "#A07840", "--ag": "rgba(160,120,64,0.1)",
+    "--track": "rgba(0,0,0,0.08)", "--input-bg": "#F3F4F6",
+    "--form-bg": "#F7F8FA", "--hover": "rgba(160,120,64,0.05)",
+    "--chart-grid": "rgba(0,0,0,0.05)", "--chart-tick": "rgba(17,24,39,0.35)",
     "--tooltip": "#1F2937",
   };
   const vars = theme === "dark" ? D : L;
+  const tooltipStyle = {
+    background: vars["--tooltip"],
+    border: `1px solid ${vars["--border"]}`,
+    borderRadius: "10px",
+    fontFamily: "DM Sans, sans-serif",
+    fontSize: "13px",
+  };
 
-  const tooltipStyle = { background: vars["--tooltip"], border: `1px solid ${vars["--border"]}`, borderRadius: "10px", fontFamily: "DM Sans, sans-serif", fontSize: "13px" };
-
-  // ── LOGIN ──────────────────────────────────────────────────────────────────
+  // ── LOGIN ──────────────────────────────────────────────────────────────
   if (!authed) {
     return (
       <div className="flex min-h-screen items-center justify-center px-5" style={vars as React.CSSProperties}>
@@ -334,9 +323,16 @@ function AdminPage() {
                 className="a-input w-full rounded-xl px-4 py-3 text-sm outline-none"
               />
             </div>
-            {pwError && <div className="flex items-center gap-2 text-red-400 text-sm"><AlertCircle className="h-4 w-4" /> Incorrect password</div>}
-            <button onClick={() => password === ADMIN_PASSWORD ? (setAuthed(true), setPwError(false)) : setPwError(true)}
-              className="w-full rounded-xl py-3 text-sm font-semibold transition-all" style={{ background: "var(--gold)", color: "#1A1410" }}>
+            {pwError && (
+              <div className="flex items-center gap-2 text-red-400 text-sm">
+                <AlertCircle className="h-4 w-4" /> Incorrect password
+              </div>
+            )}
+            <button
+              onClick={() => password === ADMIN_PASSWORD ? (setAuthed(true), setPwError(false)) : setPwError(true)}
+              className="w-full rounded-xl py-3 text-sm font-semibold transition-all"
+              style={{ background: "var(--gold)", color: "#1A1410" }}
+            >
               Sign In
             </button>
           </div>
@@ -350,14 +346,13 @@ function AdminPage() {
       <div className="flex min-h-screen items-center justify-center" style={vars as React.CSSProperties}>
         <style>{css}</style>
         <div className="flex flex-col items-center gap-3">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-t-transparent" style={{ borderColor: "var(--gold)", borderTopColor: "transparent" }} />
+          <div className="h-8 w-8 animate-spin rounded-full border-2" style={{ borderColor: "var(--gold)", borderTopColor: "transparent" }} />
           <p className="text-sm" style={{ color: "var(--tm)" }}>Loading dashboard…</p>
         </div>
       </div>
     );
   }
 
-  // ── NAV ITEMS ──────────────────────────────────────────────────────────────
   const navItems: { id: Tab; label: string; icon: React.ElementType }[] = [
     { id: "overview", label: "Overview", icon: BarChart2 },
     { id: "workshops", label: "Workshops", icon: Calendar },
@@ -365,194 +360,13 @@ function AdminPage() {
     { id: "analytics", label: "Analytics", icon: TrendingUp },
   ];
 
-  // ── WORKSHOP DETAIL PANEL (shown on row click) ─────────────────────────────
-  const WorkshopPanel = ({ w, onClose }: { w: Workshop; onClose: () => void }) => {
-    const guests = bookings.filter(b => b.workshop_id === w.id);
-    const rev = guests.reduce((s, b) => s + b.amount_paid, 0);
-    const booked = w.spots_total - w.spots_left;
-    const pct = w.spots_total > 0 ? Math.round((booked / w.spots_total) * 100) : 0;
-    return (
-      <Modal onClose={onClose} wide>
-        <div className="flex items-start justify-between px-6 py-5 a-modal-header flex-shrink-0">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <Badge status={w.spots_left === 0 ? "sold out" : "active"} />
-            </div>
-            <h2 className="text-xl font-bold" style={{ color: "var(--text)", fontFamily: "Cormorant Garamond, serif", fontSize: "22px" }}>{w.style}</h2>
-            {w.song && <p className="text-sm mt-0.5" style={{ color: "var(--gold)", opacity: 0.8 }}>♪ {w.song}</p>}
-          </div>
-          <div className="flex items-center gap-2">
-            <button onClick={() => exportCSV(guests, w.style)} className="a-btn-ghost flex items-center gap-1.5 rounded-xl px-3 py-2 text-sm">
-              <Download className="h-3.5 w-3.5" /> Export
-            </button>
-            <button onClick={() => { onClose(); openEdit(w); }} className="a-btn-ghost flex items-center gap-1.5 rounded-xl px-3 py-2 text-sm">
-              <Edit2 className="h-3.5 w-3.5" /> Edit
-            </button>
-            <button onClick={onClose} className="a-btn-ghost rounded-xl p-2">
-              <X className="h-4 w-4" />
-            </button>
-          </div>
-        </div>
-
-        {/* Meta row */}
-        <div className="flex flex-wrap gap-4 px-6 py-4 a-section-divider flex-shrink-0">
-          {[{ icon: Calendar, text: w.date }, { icon: Clock, text: w.time }, { icon: MapPin, text: `${w.venue}, ${w.city}` }].map(({ icon: Icon, text }) => (
-            <div key={text} className="flex items-center gap-2 text-sm" style={{ color: "var(--tm)" }}>
-              <Icon className="h-4 w-4" style={{ color: "var(--gold)" }} />
-              {text}
-            </div>
-          ))}
-        </div>
-
-        {/* Stats */}
-        <div className="grid grid-cols-3 a-stats-bar flex-shrink-0">
-          {[{ label: "Attendees", value: guests.length }, { label: "Revenue", value: fmt$(rev) }, { label: "Spots Left", value: w.spots_left }].map(s => (
-            <div key={s.label} className="px-6 py-4 text-center">
-              <p className="text-2xl font-bold" style={{ color: "var(--text)" }}>{s.value}</p>
-              <p className="text-xs mt-0.5 font-medium" style={{ color: "var(--tm)" }}>{s.label}</p>
-            </div>
-          ))}
-        </div>
-
-        {/* Capacity */}
-        <div className="px-6 py-4 a-section-divider flex-shrink-0">
-          <CapBar left={w.spots_left} total={w.spots_total} />
-        </div>
-
-        {/* Guest list */}
-        <div className="overflow-y-auto flex-1 p-4">
-          {guests.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 gap-3">
-              <Users className="h-12 w-12" style={{ color: "var(--tm)", opacity: 0.3 }} />
-              <p className="text-sm" style={{ color: "var(--tm)" }}>No bookings yet for this workshop</p>
-            </div>
-          ) : (
-            <table className="w-full">
-              <thead>
-                <tr className="a-thead">
-                  {["#", "Name", "Email", "Amount", "Booked"].map(h => (
-                    <th key={h} className="px-3 py-2.5 text-left text-xs font-semibold" style={{ color: "var(--tm)" }}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {guests.map((b, i) => (
-                  <tr key={b.id} className="a-tr">
-                    <td className="px-3 py-3 text-xs" style={{ color: "var(--tm)" }}>{i + 1}</td>
-                    <td className="px-3 py-3 text-sm font-medium" style={{ color: "var(--text)" }}>{b.attendee_name}</td>
-                    <td className="px-3 py-3">
-                      <span className="flex items-center text-sm" style={{ color: "var(--tm)" }}>{b.attendee_email}<CopyBtn text={b.attendee_email} /></span>
-                    </td>
-                    <td className="px-3 py-3 text-sm font-semibold" style={{ color: "var(--gold)" }}>{fmt$(b.amount_paid)}</td>
-                    <td className="px-3 py-3 text-xs" style={{ color: "var(--tm)" }}>{fmtDate(b.created_at)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </div>
-      </Modal>
-    );
-  };
-
-  // ── WORKSHOP FORM ──────────────────────────────────────────────────────────
-  const WorkshopForm = () => (
-    <Modal onClose={closeForm}>
-      {/* Header */}
-      <div className="flex items-center justify-between px-7 py-6 a-modal-header flex-shrink-0">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-widest mb-1.5" style={{ color: "var(--gold)", letterSpacing: "0.12em" }}>
-            {editWorkshop ? "Edit Workshop" : "New Workshop"}
-          </p>
-          <h3 className="text-2xl font-bold" style={{ color: "var(--text)", fontFamily: "Cormorant Garamond, serif", fontSize: "26px", lineHeight: 1.2 }}>
-            {editWorkshop ? editWorkshop.style : "Create a Workshop"}
-          </h3>
-        </div>
-        <button onClick={closeForm} className="a-btn-ghost rounded-xl p-2.5"><X className="h-4 w-4" /></button>
-      </div>
-
-      {/* Body */}
-      <div className="overflow-y-auto flex-1 px-7 py-6 space-y-8" style={{ background: "var(--form-bg)" }}>
-
-        {/* Details */}
-        <div>
-          <div className="flex items-center gap-3 mb-5">
-            <span className="a-section-dot" />
-            <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "var(--gold)", letterSpacing: "0.12em" }}>Workshop Details</span>
-            <div className="flex-1 h-px" style={{ background: "var(--border)" }} />
-          </div>
-          <div className="space-y-4">
-            <Field label="Workshop Name *" value={form.style} onChange={v => setForm(f => ({ ...f, style: v }))} placeholder="e.g. Nach Firiri Heels" />
-            <Field label="Song / Theme" value={form.song} onChange={v => setForm(f => ({ ...f, song: v }))} placeholder="e.g. Nach Firiri" />
-            <div className="flex gap-4">
-              <Field half label="Venue *" value={form.venue} onChange={v => setForm(f => ({ ...f, venue: v }))} placeholder="e.g. Ripley-Grier Studios" />
-              <Field half label="City *" value={form.city} onChange={v => setForm(f => ({ ...f, city: v }))} placeholder="e.g. New York" />
-            </div>
-          </div>
-        </div>
-
-        {/* Schedule */}
-        <div>
-          <div className="flex items-center gap-3 mb-5">
-            <span className="a-section-dot" />
-            <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "var(--gold)", letterSpacing: "0.12em" }}>Schedule</span>
-            <div className="flex-1 h-px" style={{ background: "var(--border)" }} />
-          </div>
-          <div className="space-y-4">
-            <div className="flex gap-4">
-              <Field half label="Date *" value={form.date} onChange={v => setForm(f => ({ ...f, date: v }))} placeholder="July 18, 2026" />
-              <Field half label="Time *" value={form.time} onChange={v => setForm(f => ({ ...f, time: v }))} placeholder="7:00–9:00 PM" />
-            </div>
-            <Field label="Duration" value={form.duration} onChange={v => setForm(f => ({ ...f, duration: v }))} placeholder="2 Hours" />
-          </div>
-        </div>
-
-        {/* Pricing */}
-        <div>
-          <div className="flex items-center gap-3 mb-5">
-            <span className="a-section-dot" />
-            <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "var(--gold)", letterSpacing: "0.12em" }}>Pricing & Capacity</span>
-            <div className="flex-1 h-px" style={{ background: "var(--border)" }} />
-          </div>
-          <div className="space-y-4">
-            <div className="flex gap-4">
-              <Field half label="Price ($)" value={form.price} onChange={v => setForm(f => ({ ...f, price: Number(v) }))} type="number" />
-              <Field half label="Total Spots" value={form.spots_total} onChange={v => setForm(f => ({ ...f, spots_total: Number(v) }))} type="number" />
-            </div>
-            <div>
-              <Field label="Stripe Price ID *" value={form.price_id} onChange={v => setForm(f => ({ ...f, price_id: v }))} placeholder="price_1..." mono />
-              <p className="text-xs mt-2" style={{ color: "var(--tm)" }}>Find this in your Stripe Dashboard → Products → Prices</p>
-            </div>
-          </div>
-        </div>
-
-        {saveMsg && (
-          <div className="flex items-center gap-2.5 rounded-xl px-4 py-3.5" style={{ background: saveMsg.startsWith("✅") ? "rgba(34,197,94,0.08)" : "rgba(248,113,113,0.08)", border: `1px solid ${saveMsg.startsWith("✅") ? "rgba(34,197,94,0.2)" : "rgba(248,113,113,0.2)"}` }}>
-            <span style={{ color: saveMsg.startsWith("✅") ? "#22c55e" : "#f87171", fontSize: "13px" }}>{saveMsg}</span>
-          </div>
-        )}
-      </div>
-
-      {/* Footer */}
-      <div className="flex gap-3 px-7 py-5 a-modal-footer flex-shrink-0">
-        <button onClick={closeForm} className="flex-1 a-btn-ghost rounded-xl py-3.5 text-sm font-semibold">Cancel</button>
-        <button onClick={handleSave} disabled={saving}
-          className="flex-1 rounded-xl py-3.5 text-sm font-semibold transition-all disabled:opacity-50"
-          style={{ background: "var(--gold)", color: "#1A1410" }}>
-          {saving ? "Saving…" : editWorkshop ? "Save Changes" : "Add Workshop"}
-        </button>
-      </div>
-    </Modal>
-  );
-
-  // ── RENDER ─────────────────────────────────────────────────────────────────
+  // ── RENDER ─────────────────────────────────────────────────────────────
   return (
     <div className="flex h-screen overflow-hidden" style={{ ...vars as React.CSSProperties, background: "var(--bg)", color: "var(--text)" }}>
       <style>{css}</style>
 
-      {/* ── SIDEBAR ──────────────────────────────────────────────────────── */}
+      {/* SIDEBAR */}
       <aside className="hidden lg:flex flex-col w-60 flex-shrink-0 border-r" style={{ background: "var(--sidebar)", borderColor: "var(--border)" }}>
-        {/* Logo */}
         <div className="px-5 py-5 border-b" style={{ borderColor: "var(--border)" }}>
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "var(--ag)" }}>
@@ -564,28 +378,20 @@ function AdminPage() {
             </div>
           </div>
         </div>
-
-        {/* Nav */}
         <nav className="flex-1 px-3 py-4 space-y-0.5">
           <p className="text-xs font-semibold uppercase tracking-widest px-3 mb-3" style={{ color: "var(--tm)", letterSpacing: "0.12em" }}>Main</p>
           {navItems.map(item => (
-            <button
-              key={item.id}
-              onClick={() => setTab(item.id)}
-              className={cn("w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all text-left", tab === item.id ? "a-nav-active" : "a-nav-item")}
-            >
+            <button key={item.id} onClick={() => setTab(item.id)}
+              className={cn("w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all text-left", tab === item.id ? "a-nav-active" : "a-nav-item")}>
               <item.icon className="h-4 w-4 flex-shrink-0" />
               {item.label}
               {tab === item.id && <ChevronRight className="h-3.5 w-3.5 ml-auto opacity-50" />}
             </button>
           ))}
         </nav>
-
-        {/* Bottom */}
         <div className="px-3 py-4 border-t space-y-0.5" style={{ borderColor: "var(--border)" }}>
           <Link to="/" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all a-nav-item">
-            <Home className="h-4 w-4 flex-shrink-0" />
-            Back to Site
+            <Home className="h-4 w-4 flex-shrink-0" /> Back to Site
           </Link>
           <button onClick={() => setTheme(t => t === "dark" ? "light" : "dark")}
             className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all a-nav-item">
@@ -594,16 +400,13 @@ function AdminPage() {
           </button>
           <button onClick={() => setAuthed(false)}
             className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all a-logout">
-            <LogOut className="h-4 w-4 flex-shrink-0" />
-            Log Out
+            <LogOut className="h-4 w-4 flex-shrink-0" /> Log Out
           </button>
         </div>
       </aside>
 
-      {/* ── MAIN AREA ─────────────────────────────────────────────────────── */}
+      {/* MAIN AREA */}
       <div className="flex flex-col flex-1 min-w-0">
-
-        {/* Top bar */}
         <header className="flex items-center justify-between px-6 py-4 border-b flex-shrink-0" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
           <div>
             <h1 className="text-xl font-bold" style={{ color: "var(--text)", fontFamily: "Cormorant Garamond, serif", fontSize: "22px" }}>
@@ -634,11 +437,10 @@ function AdminPage() {
           ))}
         </div>
 
-        {/* Page content — scrollable */}
         <main className="flex-1 overflow-y-auto p-6">
           <AnimatePresence mode="wait">
 
-            {/* ── OVERVIEW ───────────────────────────────────────────────── */}
+            {/* OVERVIEW */}
             {tab === "overview" && (
               <motion.div key="ov" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-6">
                 <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
@@ -647,7 +449,6 @@ function AdminPage() {
                   <StatCard label="Workshops" value={workshops.length} sub={`${soldOutCount} sold out`} icon={Calendar} />
                   <StatCard label="Unique Attendees" value={uniqueAttendees} sub="Distinct emails" icon={Mail} />
                 </div>
-
                 <div className="grid gap-5 xl:grid-cols-2">
                   <div className="a-card rounded-2xl p-5">
                     <p className="text-base font-bold mb-0.5" style={{ color: "var(--text)", fontFamily: "Cormorant Garamond, serif", fontSize: "17px" }}>Revenue</p>
@@ -688,12 +489,11 @@ function AdminPage() {
                     ) : <div className="h-[180px] flex items-center justify-center text-sm" style={{ color: "var(--tm)" }}>No data yet</div>}
                   </div>
                 </div>
-
                 <div className="grid gap-5 xl:grid-cols-2">
                   <div className="a-card rounded-2xl overflow-hidden">
                     <div className="flex items-center justify-between px-5 py-4 a-table-head">
                       <p className="text-sm font-semibold" style={{ color: "var(--text)" }}>Recent Bookings</p>
-                      <button onClick={() => setTab("bookings")} className="flex items-center gap-1 text-xs font-medium transition-all" style={{ color: "var(--gold)" }}>
+                      <button onClick={() => setTab("bookings")} className="flex items-center gap-1 text-xs font-medium" style={{ color: "var(--gold)" }}>
                         View all <ArrowUpRight className="h-3.5 w-3.5" />
                       </button>
                     </div>
@@ -741,7 +541,7 @@ function AdminPage() {
               </motion.div>
             )}
 
-            {/* ── WORKSHOPS ──────────────────────────────────────────────── */}
+            {/* WORKSHOPS */}
             {tab === "workshops" && (
               <motion.div key="ws" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-5">
                 <div className="flex items-center justify-between">
@@ -757,8 +557,6 @@ function AdminPage() {
                     </button>
                   </div>
                 </div>
-
-                {/* LIST VIEW */}
                 {workshopView === "list" && (
                   <div className="a-card rounded-2xl overflow-hidden">
                     <table className="w-full">
@@ -804,12 +602,9 @@ function AdminPage() {
                                 <p className="text-sm font-semibold" style={{ color: "var(--gold)" }}>{fmt$(rev)}</p>
                                 <p className="text-xs mt-0.5" style={{ color: "var(--tm)" }}>{wBk.length} booked</p>
                               </td>
-                              <td className="px-5 py-4">
-                                <Badge status={w.spots_left === 0 ? "sold out" : "active"} />
-                              </td>
+                              <td className="px-5 py-4"><Badge status={w.spots_left === 0 ? "sold out" : "active"} /></td>
                               <td className="px-5 py-4 text-right" onClick={e => e.stopPropagation()}>
-                                <button onClick={() => openEdit(w)}
-                                  className="a-btn-ghost rounded-lg p-2 inline-flex items-center gap-1 text-xs">
+                                <button onClick={() => openEdit(w)} className="a-btn-ghost rounded-lg p-2 inline-flex items-center gap-1 text-xs">
                                   <Edit2 className="h-3.5 w-3.5" />
                                 </button>
                               </td>
@@ -823,8 +618,6 @@ function AdminPage() {
                     </table>
                   </div>
                 )}
-
-                {/* GRID VIEW */}
                 {workshopView === "grid" && (
                   <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                     {workshops.map(w => {
@@ -876,7 +669,7 @@ function AdminPage() {
               </motion.div>
             )}
 
-            {/* ── BOOKINGS ───────────────────────────────────────────────── */}
+            {/* BOOKINGS */}
             {tab === "bookings" && (
               <motion.div key="bk" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-5">
                 <div className="flex flex-wrap items-center gap-3">
@@ -906,7 +699,7 @@ function AdminPage() {
                     <table className="w-full">
                       <thead>
                         <tr className="a-table-head">
-                          {[["Name","attendee_name"],["Email","attendee_email"],["Workshop","workshop_name"],["Date","workshop_date"],["Amount","amount_paid"],["Status","status"],["Booked","created_at"]].map(([label, col]) => (
+                          {[["Name", "attendee_name"], ["Email", "attendee_email"], ["Workshop", "workshop_name"], ["Date", "workshop_date"], ["Amount", "amount_paid"], ["Status", "status"], ["Booked", "created_at"]].map(([label, col]) => (
                             <th key={col} onClick={() => toggleSort(col)}
                               className="px-5 py-3.5 text-left text-xs font-semibold cursor-pointer hover:opacity-80 select-none transition-opacity"
                               style={{ color: "var(--tm)" }}>
@@ -942,7 +735,7 @@ function AdminPage() {
               </motion.div>
             )}
 
-            {/* ── ANALYTICS ──────────────────────────────────────────────── */}
+            {/* ANALYTICS */}
             {tab === "analytics" && (
               <motion.div key="an" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-6">
                 <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
@@ -958,7 +751,6 @@ function AdminPage() {
                     </div>
                   ))}
                 </div>
-
                 <div className="grid gap-5 xl:grid-cols-2">
                   <div className="a-card rounded-2xl p-5">
                     <p className="text-base font-bold mb-0.5" style={{ color: "var(--text)", fontFamily: "Cormorant Garamond, serif", fontSize: "17px" }}>Revenue Over Time</p>
@@ -995,7 +787,6 @@ function AdminPage() {
                     </ResponsiveContainer>
                   </div>
                 </div>
-
                 <div className="a-card rounded-2xl overflow-hidden">
                   <div className="px-5 py-4 a-table-head">
                     <p className="text-sm font-semibold" style={{ color: "var(--text)" }}>Workshop Breakdown</p>
@@ -1004,7 +795,7 @@ function AdminPage() {
                     <table className="w-full">
                       <thead>
                         <tr className="a-table-head">
-                          {["Workshop","Date","Bookings","Fill Rate","Revenue","Status"].map(h => (
+                          {["Workshop", "Date", "Bookings", "Fill Rate", "Revenue", "Status"].map(h => (
                             <th key={h} className="px-5 py-3.5 text-left text-xs font-semibold" style={{ color: "var(--tm)" }}>{h}</th>
                           ))}
                         </tr>
@@ -1043,12 +834,29 @@ function AdminPage() {
         </main>
       </div>
 
-      {/* ── MODALS ────────────────────────────────────────────────────────── */}
+      {/* MODALS */}
       <AnimatePresence>
-        {!!selectedWorkshop && <WorkshopPanel w={selectedWorkshop} onClose={() => setSelectedWorkshop(null)} />}
-        {(showAddForm || !!editWorkshop) && <WorkshopForm />}
+        {!!selectedWorkshop && (
+          <WorkshopPanel
+            w={selectedWorkshop}
+            bookings={bookings}
+            onClose={() => setSelectedWorkshop(null)}
+            onEdit={openEdit}
+            onExport={exportCSV}
+          />
+        )}
+        {(showAddForm || !!editWorkshop) && (
+          <WorkshopForm
+            form={form}
+            setForm={setForm}
+            saving={saving}
+            saveMsg={saveMsg}
+            editWorkshop={editWorkshop}
+            onClose={closeForm}
+            onSave={handleSave}
+          />
+        )}
       </AnimatePresence>
-
     </div>
   );
 }
