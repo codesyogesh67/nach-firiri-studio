@@ -32,7 +32,7 @@ export function Footer() {
         <div className="flex flex-col items-center gap-6 text-center">
           <Link to="/" className="flex flex-col items-center leading-none">
             <span className="font-display text-3xl font-semibold text-[var(--ivory)]">Nach Firiri</span>
-            <span className="font-deva mt-1 text-sm text-[var(--gold)]">नाच फिरिरी — Dance. Feel. Belong.</span>
+            <span className="font-mono mt-1 text-xs text-[var(--gold-muted)] tracking-widest uppercase">Dance. Feel. Belong.</span>
           </Link>
 
           <nav className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 font-body text-sm text-[var(--ivory)]/70">
