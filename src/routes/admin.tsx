@@ -573,10 +573,10 @@ function AdminPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[var(--bg)]">
+    <div className="min-h-screen bg-[var(--bg)] pt-20">
 
       {/* ── TOP NAV ─────────────────────────────────────────────────────── */}
-      <div className="sticky top-0 z-40 border-b border-[var(--border)] bg-[var(--bg)]/90 backdrop-blur-sm">
+      <div className="sticky top-20 z-40 border-b border-[var(--border)] bg-[var(--bg)]/90 backdrop-blur-sm">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-3.5">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2.5">
