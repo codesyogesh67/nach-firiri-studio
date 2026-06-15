@@ -15,8 +15,8 @@ import {
   ResponsiveContainer, BarChart, Bar, Cell,
 } from "recharts";
 import { cn } from "@/lib/utils";
-import { WorkshopForm } from "./WorkshopForm";
-import { WorkshopPanel } from "./WorkshopPanel";
+import { WorkshopForm } from "@/components/admin/WorkshopForm";
+import { WorkshopPanel } from "@/components/admin/WorkshopPanel";
 
 const SUPABASE_URL = "https://kcwshieovehgpdhahowq.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtjd3NoaWVvdmVoZ3BkaGFob3dxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyODY2MDcsImV4cCI6MjA5Njg2MjYwN30.iia9Uuzzg5V7l4mG4pqbitshV7zdLjtw3JxCOJCYwD8";
