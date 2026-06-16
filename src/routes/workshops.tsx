@@ -8,6 +8,7 @@ import { Reveal } from "@/components/Reveal";
 import { Button } from "@/components/ui/button";
 import { CITIES } from "@/lib/site-data";
 import { cn } from "@/lib/utils";
+import { PaymentModal } from "@/components/PaymentModal";
 
 const SUPABASE_URL = "https://kcwshieovehgpdhahowq.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtjd3NoaWVvdmVoZ3BkaGFob3dxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyODY2MDcsImV4cCI6MjA5Njg2MjYwN30.iia9Uuzzg5V7l4mG4pqbitshV7zdLjtw3JxCOJCYwD8";
@@ -44,6 +45,7 @@ function WorkshopsPage() {
   const [view, setView] = useState<"list" | "calendar">("list");
   const [workshops, setWorkshops] = useState<Workshop[]>([]);
   const [loading, setLoading] = useState(true);
+  const [payingWorkshop, setPayingWorkshop] = useState<Workshop | null>(null);
 
   // fetch workshops from Supabase
   useEffect(() => {
@@ -63,31 +65,7 @@ function WorkshopsPage() {
     [city, workshops],
   );
 
-  const handleBookNow = async (w: Workshop) => {
-    try {
-      const res = await fetch(
-        `${SUPABASE_URL}/functions/v1/create-checkout-session`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
-          },
-          body: JSON.stringify({
-            workshop_id: w.id,
-            workshop_name: w.style,
-            workshop_date: w.date,
-            price_id: w.price_id,
-          }),
-        }
-      );
-      const data = await res.json();
-      window.location.href = data.url;
-    } catch (err) {
-      console.error("Error:", err);
-      toast.error("Something went wrong. Please try again.");
-    }
-  };
+ const handleBookNow = (w: Workshop) => setPayingWorkshop(w);
 
   return (
     <>
@@ -188,6 +166,13 @@ function WorkshopsPage() {
           </div>
         )}
       </section>
+
+      {payingWorkshop && (
+  <PaymentModal
+    workshop={payingWorkshop}
+    onClose={() => setPayingWorkshop(null)}
+  />
+)}
     </>
   );
 }
