@@ -1,6 +1,6 @@
 
 
-import { useState, useCallback } from "react";
+import { useState, useCallback,useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { X, Lock, Calendar, Clock, MapPin, ChevronRight } from "lucide-react";
 import {
@@ -261,7 +261,7 @@ export function PaymentModal({
   }, [workshop]);
 
   // Run once on mount
-  useState(() => { init(); });
+useEffect(() =>{init(): },[]);
 
   const elementsOptions: StripeElementsOptions = clientSecret
     ? { clientSecret, appearance: stripeAppearance, fonts: [{ cssSrc: "https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Space+Mono&display=swap" }] }
