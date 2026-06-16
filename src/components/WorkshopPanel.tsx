@@ -1,8 +1,9 @@
 import { Calendar, Clock, MapPin, Download, Edit2, X, Users } from "lucide-react";
-import { Modal } from "./Modal";
-import { Badge } from "./Badge";
-import { CapBar } from "./CapBar";
-import { CopyBtn } from "./CopyBtn";
+import { Modal } from "@/routes/admin";
+import { Badge } from "@/routes/admin";
+import { CapBar } from "@/routes/admin";
+import { CopyBtn } from "@/routes/admin";
+
 
 type Booking = {
   id: string; created_at: string; workshop_id: string;
