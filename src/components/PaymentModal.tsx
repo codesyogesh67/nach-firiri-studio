@@ -16,7 +16,7 @@ import {
 } from "@stripe/react-stripe-js";
 
 // ─── Replace with your actual Stripe publishable key ────────────────────────
-const stripePromise = loadStripe("pk_live_YOUR_PUBLISHABLE_KEY_HERE");
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
 const SUPABASE_URL = "https://kcwshieovehgpdhahowq.supabase.co";
 const SUPABASE_ANON_KEY =
