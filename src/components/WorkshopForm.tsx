@@ -1,6 +1,6 @@
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Modal } from "./Modal";
+import { Modal } from "@/routes/admin";
 
 const EMPTY_FORM = {
   id: "", style: "", song: "", date: "", time: "", venue: "", city: "",
