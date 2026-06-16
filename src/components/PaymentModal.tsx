@@ -36,7 +36,7 @@ export function PaymentModal({
     setError(null);
     try {
       const res = await fetch(
-        `${SUPABASE_URL}/functions/v1/create-checkout-session`,
+        `${SUPABASE_URL}/functions/v1/create-payment-intent`,
         {
           method: "POST",
           headers: {
