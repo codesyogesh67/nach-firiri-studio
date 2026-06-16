@@ -43,12 +43,12 @@ export function PaymentModal({
             "Content-Type": "application/json",
             Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
           },
-          body: JSON.stringify({
-            workshop_id: workshop.id,
-            workshop_name: workshop.style,
-            workshop_date: workshop.date,
-            price_id: workshop.price_id,
-          }),
+         body: JSON.stringify({
+  workshop_id: workshop.id,
+  workshop_name: workshop.style,
+  workshop_date: workshop.date,
+  amount: workshop.price,
+}),
         }
       );
       const data = await res.json();
