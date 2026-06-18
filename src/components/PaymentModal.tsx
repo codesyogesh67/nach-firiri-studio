@@ -113,12 +113,17 @@ function CheckoutForm({ workshop, onClose }: { workshop: Workshop; onClose: () =
       return;
     }
 
-    const { error: confirmErr } = await stripe.confirmPayment({
-      elements,
-      confirmParams: {
-        return_url: `${window.location.origin}/booking-success?workshop=${encodeURIComponent(workshop.style)}&date=${encodeURIComponent(workshop.date)}`,
+  const { error: confirmErr } = await stripe.confirmPayment({
+  elements,
+  confirmParams: {
+    return_url: `${window.location.origin}/booking-success?workshop=${encodeURIComponent(workshop.style)}&date=${encodeURIComponent(workshop.date)}`,
+    payment_method_data: {
+      billing_details: {
+        address: { country: "US" },
       },
-    });
+    },
+  },
+});
 
     if (confirmErr) {
       setError(confirmErr.message ?? "Payment failed. Please try again.");
@@ -131,7 +136,7 @@ function CheckoutForm({ workshop, onClose }: { workshop: Workshop; onClose: () =
       <PaymentElement
         options={{
           layout: { type: "tabs", defaultCollapsed: false },
-          fields: { billingDetails: { address: "never" } },
+         
         }}
       />
 
