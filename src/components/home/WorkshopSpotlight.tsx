@@ -26,8 +26,9 @@ export function WorkshopSpotlight() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    const today = new Date().toISOString().split("T")[0];
     fetch(
-      `${SUPABASE_URL}/rest/v1/workshops?active=eq.true&order=date.asc&limit=1`,
+      `${SUPABASE_URL}/rest/v1/workshops?active=eq.true&date=gte.${today}&order=date.asc&limit=1`,
       {
         headers: {
           apikey: SUPABASE_ANON_KEY,
