@@ -196,6 +196,7 @@ export function Badge({ status }: { status: string }) {
     cancelled: "bg-red-500/12 text-red-400 border-red-500/20",
     refunded: "bg-sky-500/12 text-sky-400 border-sky-500/20",
     "sold out": "bg-red-500/12 text-red-400 border-red-500/20",
+    past: "bg-zinc-500/12 text-zinc-400 border-zinc-500/20",
   };
   return (
     <span
@@ -1340,7 +1341,7 @@ function AdminPage() {
                                 <td className="px-4 sm:px-5 py-4 hidden sm:table-cell">
                                   <Badge
                                     status={
-                                      w.spots_left === 0 ? "sold out" : "active"
+                                      w.spots_left === 0 ? "sold out" : new Date(w.date) < new Date() ? "past" : "active"
                                     }
                                   />
                                 </td>
@@ -1415,7 +1416,7 @@ function AdminPage() {
                             </div>
                             <Badge
                               status={
-                                w.spots_left === 0 ? "sold out" : "active"
+                                w.spots_left === 0 ? "sold out" : new Date(w.date) < new Date() ? "past" : "active"
                               }
                             />
                           </div>
@@ -1986,7 +1987,7 @@ function AdminPage() {
                               <td className="px-4 sm:px-5 py-4">
                                 <Badge
                                   status={
-                                    w.spots_left === 0 ? "sold out" : "active"
+                                    w.spots_left === 0 ? "sold out" : new Date(w.date) < new Date() ? "past" : "active"
                                   }
                                 />
                               </td>

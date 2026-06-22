@@ -123,7 +123,15 @@ export function WorkshopPanel({
       <div className="flex items-start justify-between px-6 py-5 a-modal-header flex-shrink-0">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <Badge status={w.spots_left === 0 ? "sold out" : "active"} />
+            <Badge
+              status={
+                w.spots_left === 0
+                  ? "sold out"
+                  : new Date(w.date) < new Date()
+                  ? "past"
+                  : "active"
+              }
+            />{" "}
           </div>
           <h2
             className="text-xl font-bold"
