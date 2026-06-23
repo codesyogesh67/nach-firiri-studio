@@ -1,152 +1,370 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
-import { Search, Lock } from "lucide-react";
-import { PageHero } from "@/components/PageHero";
-import { Reveal } from "@/components/Reveal";
-import { Button } from "@/components/ui/button";
-import { YouTubeEmbed } from "@/components/YouTubeEmbed";
-import { TUTORIALS, type Difficulty } from "@/lib/site-data";
-import { cn } from "@/lib/utils";
+import { useUser, useAuth, SignInButton } from "@clerk/clerk-react";
+import { BunnyPlayer } from "@/components/BunnyPlayer";
+import { CoursePaymentModal } from "@/components/CoursePaymentModal";
+import { useState, useEffect } from "react";
+
+const FREE_VIDEO_ID = "cdba194d-8241-4cc1-8f92-80df9df5a806";
+const PAID_VIDEO_ID = "ead8ac34-300f-4099-b5ff-b1e50d8f8db4";
+const COURSE_ID = "course-001";
 
 export const Route = createFileRoute("/learn")({
-  head: () => ({
-    meta: [
-      { title: "Learn — Nach Firiri | Dance Tutorial Studio" },
-      { name: "description", content: "Stream South Asian dance tutorials by difficulty and song. Free lessons plus a members library." },
-      { property: "og:title", content: "Learn — Nach Firiri Tutorial Studio" },
-      { property: "og:description", content: "Netflix for dance — tutorials for every level." },
-    ],
-  }),
   component: LearnPage,
 });
 
-const diffColor: Record<Difficulty, string> = {
-  Beginner: "bg-emerald-500/20 text-emerald-300 border-emerald-500/40",
-  Intermediate: "bg-[var(--gold)]/15 text-[var(--gold)] border-[var(--gold)]/40",
-  Advanced: "bg-[var(--maroon)]/40 text-red-300 border-[var(--maroon)]",
-};
-
 function LearnPage() {
-  const [q, setQ] = useState("");
-  const [diff, setDiff] = useState<"All" | Difficulty>("All");
+  const { isSignedIn, isLoaded, getToken } = useAuth();
+  const { user } = useUser();
+  const [activeVideo, setActiveVideo] = useState<"free" | "paid" | null>(null);
+  const [showPayment, setShowPayment] = useState(false);
+  const [enrolled, setEnrolled] = useState(false);
+  const [checkingEnrollment, setCheckingEnrollment] = useState(true);
 
-  const matches = (t: (typeof TUTORIALS)[number]) =>
-    (diff === "All" || t.difficulty === diff) &&
-    (t.title.toLowerCase().includes(q.toLowerCase()) || t.song.toLowerCase().includes(q.toLowerCase()));
+  useEffect(() => {
+    async function checkEnrollment() {
+      if (!isLoaded) return;
+      if (!isSignedIn || !user) {
+        setCheckingEnrollment(false);
+        return;
+      }
 
-  const free = useMemo(() => TUTORIALS.filter((t) => t.access === "FREE" && matches(t)), [q, diff]);
-  const members = useMemo(() => TUTORIALS.filter((t) => t.access === "MEMBERS" && matches(t)), [q, diff]);
+      try {
+        const clerkToken = await getToken();
+        const res = await fetch(
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/check-enrollment`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              apikey: import.meta.env.VITE_SUPABASE_ANON_KEY,
+              Authorization: `Bearer ${clerkToken}`,
+            },
+            body: JSON.stringify({
+              userId: user.id,
+              courseId: COURSE_ID,
+            }),
+          }
+        );
+        const data = await res.json();
+        setEnrolled(data.enrolled);
+      } catch (err) {
+        console.error("Enrollment check failed:", err);
+      } finally {
+        setCheckingEnrollment(false);
+      }
+    }
+
+    checkEnrollment();
+  }, [isLoaded, isSignedIn, user]);
 
   return (
-    <>
-      <PageHero label="Tutorial Studio" title="Learn From Swastika" deva="सिक र नाच">
-        <div className="mx-auto flex max-w-2xl flex-col gap-3 sm:flex-row">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--ivory)]/40" />
-            <input
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder="Search tutorials or songs..."
-              maxLength={80}
-              className="w-full rounded-md border border-[var(--border)] bg-[var(--input)] py-3 pl-10 pr-4 font-body text-sm text-[var(--ivory)] outline-none placeholder:text-[var(--ivory)]/40 focus:border-[var(--gold)]"
-            />
-          </div>
-          <div className="flex gap-2">
-            {(["All", "Beginner", "Intermediate", "Advanced"] as const).map((d) => (
-              <button
-                key={d}
-                onClick={() => setDiff(d)}
-                className={cn(
-                  "rounded-full border px-3 py-2 font-mono text-[0.6rem] uppercase tracking-wider transition-all",
-                  diff === d ? "border-[var(--gold)] text-[var(--gold)]" : "border-[var(--border)] text-[var(--ivory)]/60",
-                )}
-              >
-                {d}
-              </button>
-            ))}
-          </div>
-        </div>
-      </PageHero>
+    <div className="min-h-screen bg-[var(--ink)] text-[var(--ivory)]">
+      {/* Hero Header */}
+      <div className="relative pt-32 pb-16 px-6 text-center border-b border-[var(--gold)]/10">
+        <p className="font-deva text-[var(--gold)] text-sm tracking-widest mb-3">
+          सिक्नुहोस् • शिक्षा
+        </p>
+        <h1 className="font-display text-5xl md:text-6xl font-semibold text-[var(--ivory)] mb-4">
+          Learn with Swastika
+        </h1>
+        <p className="text-[var(--ivory)]/50 text-lg max-w-xl mx-auto font-body">
+          Structured tutorials rooted in Nepali & South Asian movement. Learn at
+          your own pace, wherever you are.
+        </p>
+      </div>
 
-      <section className="relative z-10 mx-auto max-w-7xl px-5 pb-16">
-        <div className="mb-6 rounded-xl border border-[var(--gold)]/20 bg-[var(--card)] p-4 text-center font-body text-sm text-[var(--ivory)]/80">
-          🔥 You've completed <span className="text-[var(--gold)]">3 tutorials</span> — keep the streak alive!
+      <div className="max-w-6xl mx-auto px-6 py-20">
+        {/* Free Video Section */}
+        <div className="mb-6">
+          <span className="font-body text-xs tracking-[0.2em] uppercase text-[var(--gold)]/60">
+            Free to watch
+          </span>
         </div>
 
-        <h2 className="font-display text-3xl font-semibold text-[var(--ivory)]">Free Lessons</h2>
-        <div className="mt-6 grid gap-6 md:grid-cols-3">
-          {free.map((t, i) => (
-            <Reveal key={t.id} delay={i * 0.08}>
-              <TutorialCard t={t} />
-            </Reveal>
-          ))}
-          {free.length === 0 && <p className="text-[var(--ivory)]/50">No matches.</p>}
-        </div>
-      </section>
-
-      <section className="relative z-10 mx-auto max-w-7xl px-5 pb-16">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <h2 className="font-display text-3xl font-semibold text-[var(--ivory)]">Members Library</h2>
-          <Button variant="gold" onClick={() => toastUnlock()}>Unlock All — $9/month</Button>
-        </div>
-        <div className="mt-6 grid gap-6 md:grid-cols-3">
-          {members.map((t, i) => (
-            <Reveal key={t.id} delay={i * 0.08}>
-              <div className="relative overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--card)] p-3">
-                <div className="relative">
-                  <div className="aspect-video overflow-hidden rounded-lg">
-                    <img src={`https://i.ytimg.com/vi/${t.videoId}/hqdefault.jpg`} alt="" loading="lazy" className="h-full w-full object-cover blur-md brightness-50" />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-20">
+          {/* Free Video Card */}
+          <div
+            className="group relative rounded-2xl overflow-hidden border border-[var(--gold)]/10 hover:border-[var(--gold)]/30 transition-all duration-500 cursor-pointer"
+            onClick={() => activeVideo !== "free" && setActiveVideo("free")}
+          >
+            {activeVideo === "free" ? (
+              <BunnyPlayer
+                videoId={FREE_VIDEO_ID}
+                courseId="free"
+                title="Introduction — Foundations of South Asian Movement"
+              />
+            ) : (
+              <div className="aspect-video bg-[var(--ink)] relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-t from-[var(--ink)] via-transparent to-transparent z-10" />
+                <div className="absolute inset-0 bg-[var(--gold)]/5 flex items-center justify-center">
+                  <div className="relative z-20 text-center">
+                    <div className="w-20 h-20 rounded-full border border-[var(--gold)]/40 flex items-center justify-center mx-auto mb-4 group-hover:border-[var(--gold)] group-hover:bg-[var(--gold)]/10 transition-all duration-300">
+                      <svg
+                        className="w-8 h-8 text-[var(--gold)] ml-1"
+                        fill="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path d="M8 5v14l11-7z" />
+                      </svg>
+                    </div>
+                    <p className="text-[var(--ivory)]/40 text-sm font-body tracking-wide">
+                      Click to watch free
+                    </p>
                   </div>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <Lock className="h-8 w-8 text-[var(--gold)]" />
-                  </div>
-                </div>
-                <div className="px-2 pb-2 pt-4">
-                  <h3 className="font-display text-xl font-semibold text-[var(--ivory)]">{t.title}</h3>
-                  <p className="mt-1 font-mono text-xs uppercase tracking-wider text-[var(--gold-muted)]">{t.difficulty} · {t.duration}</p>
                 </div>
               </div>
-            </Reveal>
-          ))}
-        </div>
-      </section>
+            )}
 
-      <section className="relative z-10 mx-auto max-w-7xl px-5 pb-24">
-        <h2 className="text-center font-display text-3xl font-semibold text-[var(--gold)]">The Community Dances</h2>
-        <p className="mt-2 text-center font-body text-sm text-[var(--ivory)]/70">Student submissions from around the world</p>
-        <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-          {TUTORIALS.map((t) => (
-            <div key={t.id} className="aspect-[3/4] overflow-hidden rounded-xl border border-[var(--border)]">
-              <img src={`https://i.ytimg.com/vi/${t.videoId}/hqdefault.jpg`} alt="" loading="lazy" className="h-full w-full object-cover" />
+            <div className="p-6 bg-[var(--ink)]">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs font-body tracking-[0.15em] uppercase text-emerald-400/80 border border-emerald-400/20 px-2.5 py-1 rounded-full">
+                  Free Preview
+                </span>
+                <span className="text-xs text-[var(--ivory)]/30 font-body">
+                  12 min
+                </span>
+              </div>
+              <h3 className="font-display text-xl text-[var(--ivory)] mb-2">
+                Foundations of South Asian Movement
+              </h3>
+              <p className="font-body text-sm text-[var(--ivory)]/40 leading-relaxed">
+                An introduction to the core principles behind Nepali & South
+                Asian dance — posture, breath, and the language of the hands.
+              </p>
             </div>
-          ))}
-        </div>
-      </section>
-    </>
-  );
-}
+          </div>
 
-function TutorialCard({ t }: { t: (typeof TUTORIALS)[number] }) {
-  return (
-    <div className="group rounded-xl border border-[var(--border)] bg-[var(--card)] p-3 transition-all hover:border-[var(--gold)]/40 hover:shadow-[var(--shadow-gold)]">
-      <YouTubeEmbed id={t.videoId} title={t.title} />
-      <div className="px-2 pb-2 pt-4">
-        <div className="flex items-center justify-between">
-          <span className={cn("rounded-full border px-2 py-0.5 font-mono text-[0.55rem] uppercase tracking-wider", diffColor[t.difficulty])}>{t.difficulty}</span>
-          <span className="font-mono text-xs text-[var(--ivory)]/50">{t.duration}</span>
+          {/* What you'll learn card */}
+          <div className="rounded-2xl border border-[var(--gold)]/10 p-8 flex flex-col justify-center bg-[var(--gold)]/[0.02]">
+            <p className="font-deva text-[var(--gold)]/60 text-xs mb-4">
+              के सिक्नुहुनेछ
+            </p>
+            <h3 className="font-display text-2xl text-[var(--ivory)] mb-6">
+              What you'll learn
+            </h3>
+            <ul className="space-y-4">
+              {[
+                "Core isolations rooted in classical Nepali technique",
+                "How to layer expression over movement",
+                "Breaking down choreography beat by beat",
+                "Adapting South Asian styles to your body",
+              ].map((item, i) => (
+                <li
+                  key={i}
+                  className="flex items-start gap-3 font-body text-sm text-[var(--ivory)]/60"
+                >
+                  <span className="text-[var(--gold)] mt-0.5 shrink-0">✦</span>
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
-        <h3 className="mt-3 font-display text-xl font-semibold text-[var(--ivory)]">{t.title}</h3>
-        <p className="mt-1 font-mono text-xs uppercase tracking-wider text-[var(--gold-muted)]">{t.song}</p>
-        <Link to="/shop" className="mt-2 inline-block font-body text-xs text-[var(--gold)] underline-offset-4 hover:underline">
-          👗 Wear what she wore →
-        </Link>
+
+        {/* Paid Course Section */}
+        <div className="mb-6">
+          <span className="font-body text-xs tracking-[0.2em] uppercase text-[var(--gold)]/60">
+            Full course
+          </span>
+        </div>
+
+        <div className="rounded-2xl border border-[var(--gold)]/20 overflow-hidden">
+          <div className="grid grid-cols-1 lg:grid-cols-2">
+            {/* Video side */}
+            {/* Video side */}
+            <div className="relative">
+              {activeVideo === "paid" && enrolled ? (
+                <BunnyPlayer
+                  videoId={PAID_VIDEO_ID}
+                  courseId={COURSE_ID}
+                  title="Full Course — Nach Firiri Signature Series"
+                />
+              ) : enrolled ? (
+                // Enrolled but not clicked yet — show play prompt
+                <div
+                  className="aspect-video bg-[var(--ink)] flex items-center justify-center relative overflow-hidden cursor-pointer group"
+                  onClick={() => setActiveVideo("paid")}
+                >
+                  <div className="absolute inset-0 bg-[var(--gold)]/5" />
+                  <div className="relative z-10 text-center px-6">
+                    <div className="w-20 h-20 rounded-full border border-[var(--gold)]/40 flex items-center justify-center mx-auto mb-4 group-hover:border-[var(--gold)] group-hover:bg-[var(--gold)]/10 transition-all duration-300">
+                      <svg
+                        className="w-8 h-8 text-[var(--gold)] ml-1"
+                        fill="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path d="M8 5v14l11-7z" />
+                      </svg>
+                    </div>
+                    <p className="font-body text-sm text-[var(--ivory)]/40">
+                      Click to play
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                // Not enrolled — show lock
+                <div className="aspect-video bg-[var(--ink)] flex items-center justify-center relative overflow-hidden">
+                  <div className="absolute inset-0 bg-[var(--gold)]/5" />
+                  <div className="relative z-10 text-center px-6">
+                    <div className="w-16 h-16 rounded-full border border-[var(--gold)]/30 flex items-center justify-center mx-auto mb-4">
+                      <svg
+                        className="w-7 h-7 text-[var(--gold)]/60"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={1.5}
+                          d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                        />
+                      </svg>
+                    </div>
+                    <p className="font-body text-sm text-[var(--ivory)]/30">
+                      Enroll to unlock
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Info side */}
+            <div className="p-8 lg:p-10 flex flex-col justify-between bg-[var(--gold)]/[0.03]">
+              <div>
+                <span className="text-xs font-body tracking-[0.15em] uppercase text-[var(--gold)]/70 border border-[var(--gold)]/20 px-2.5 py-1 rounded-full">
+                  Signature Series
+                </span>
+                <h2 className="font-display text-3xl text-[var(--ivory)] mt-4 mb-3">
+                  Nach Firiri Full Course
+                </h2>
+                <p className="font-body text-sm text-[var(--ivory)]/50 leading-relaxed mb-8">
+                  A complete guided journey through Swastika's signature
+                  movement vocabulary. From foundational technique to full
+                  choreography breakdowns — filmed in the studio, made for your
+                  living room.
+                </p>
+
+                <div className="space-y-3 mb-8">
+                  {[
+                    "6 structured video lessons",
+                    "Full choreography breakdown",
+                    "Lifetime access — watch anytime",
+                    "Mobile & desktop friendly",
+                  ].map((item, i) => (
+                    <div
+                      key={i}
+                      className="flex items-center gap-3 text-sm font-body text-[var(--ivory)]/50"
+                    >
+                      <svg
+                        className="w-4 h-4 text-[var(--gold)]/60 shrink-0"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={1.5}
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                      {item}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Price + CTA */}
+              {/* Price + CTA */}
+              <div>
+                {!enrolled && (
+                  <div className="flex items-baseline gap-2 mb-4">
+                    <span className="font-display text-4xl text-[var(--gold)]">
+                      $49
+                    </span>
+                    <span className="font-body text-sm text-[var(--ivory)]/30">
+                      one-time · lifetime access
+                    </span>
+                  </div>
+                )}
+
+                {checkingEnrollment ? (
+                  <div className="w-full py-3.5 flex items-center justify-center">
+                    <span
+                      className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"
+                      style={{ color: "oklch(0.74 0.11 85)" }}
+                    />
+                  </div>
+                ) : !isSignedIn ? (
+                  <SignInButton mode="modal">
+                    <button className="w-full bg-[var(--gold)] text-[var(--ink)] font-body font-semibold py-3.5 rounded-xl hover:bg-[var(--gold)]/90 transition-colors tracking-wide">
+                      Sign in to enroll
+                    </button>
+                  </SignInButton>
+                ) : enrolled ? (
+                  <div className="flex items-center gap-2 text-sm font-body text-[var(--ivory)]/40">
+                    <svg
+                      className="w-4 h-4 text-[var(--gold)]/60 shrink-0"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={1.5}
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                    You're enrolled · Lifetime access
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setShowPayment(true)}
+                    className="w-full bg-[var(--gold)] text-[var(--ink)] font-body font-semibold py-3.5 rounded-xl hover:bg-[var(--gold)]/90 transition-colors tracking-wide"
+                  >
+                    Enroll now — $49
+                  </button>
+                )}
+
+                {isSignedIn && (
+                  <p className="text-center text-xs text-[var(--ivory)]/20 font-body mt-3">
+                    Signed in as {user?.primaryEmailAddress?.emailAddress}
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom quote */}
+        <div className="mt-20 text-center">
+          <p className="font-deva text-[var(--gold)]/40 text-lg mb-2">
+            नाचौं, सिकौं, बढौं
+          </p>
+          <p className="font-body text-xs text-[var(--ivory)]/20 tracking-widest uppercase">
+            Dance. Learn. Grow.
+          </p>
+        </div>
       </div>
+
+      {/* Course Payment Modal */}
+      {showPayment && user && (
+        <CoursePaymentModal
+          courseId={COURSE_ID}
+          courseName="Nach Firiri Full Course"
+          amount={49}
+          userId={user.id}
+          userEmail={user.primaryEmailAddress?.emailAddress ?? ""}
+          onClose={() => setShowPayment(false)}
+          onSuccess={() => {
+            setShowPayment(false);
+            setEnrolled(true);
+            setActiveVideo("paid");
+          }}
+        />
+      )}
     </div>
   );
-}
-
-import { toast } from "sonner";
-function toastUnlock() {
-  toast.success("Membership coming soon — join the waitlist on the shop page! 💛");
 }
