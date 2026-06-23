@@ -6,6 +6,7 @@ import {
 import { useEffect, type ReactNode } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Toaster } from "sonner";
+import { ClerkProvider } from "@clerk/clerk-react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -87,37 +88,39 @@ function RootComponent() {
   const isAdmin = pathname === "/admin";
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <LanguageProvider>
-        <CustomCursor />
-        <GoldDust />
-        {!isAdmin && <Navbar />}
-        <main className="relative z-10 min-h-screen">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={pathname}
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -12 }}
-              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-            >
-              <Outlet />
-            </motion.div>
-          </AnimatePresence>
-        </main>
-        {!isAdmin && <Footer />}
-        <Toaster
-          theme="dark"
-          position="top-center"
-          toastOptions={{
-            style: {
-              background: "oklch(0.16 0.01 30)",
-              border: "1px solid oklch(0.74 0.11 85 / 0.4)",
-              color: "oklch(0.95 0.018 80)",
-            },
-          }}
-        />
-      </LanguageProvider>
-    </QueryClientProvider>
+    <ClerkProvider publishableKey={import.meta.env.VITE_CLERK_PUBLISHABLE_KEY}>
+      <QueryClientProvider client={queryClient}>
+        <LanguageProvider>
+          <CustomCursor />
+          <GoldDust />
+          {!isAdmin && <Navbar />}
+          <main className="relative z-10 min-h-screen">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={pathname}
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -12 }}
+                transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+              >
+                <Outlet />
+              </motion.div>
+            </AnimatePresence>
+          </main>
+          {!isAdmin && <Footer />}
+          <Toaster
+            theme="dark"
+            position="top-center"
+            toastOptions={{
+              style: {
+                background: "oklch(0.16 0.01 30)",
+                border: "1px solid oklch(0.74 0.11 85 / 0.4)",
+                color: "oklch(0.95 0.018 80)",
+              },
+            }}
+          />
+        </LanguageProvider>
+      </QueryClientProvider>
+    </ClerkProvider>
   );
 }
