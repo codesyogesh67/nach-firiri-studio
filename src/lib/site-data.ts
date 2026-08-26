@@ -4,7 +4,7 @@ import white from "@/assets/products/white-kurthi.jpg";
 import gallery1 from "@/assets/gallery-1.jpg";
 import gallery2 from "@/assets/gallery-2.jpg";
 import gallery3 from "@/assets/gallery-3.jpg";
-import portrait from "@/assets/artist-portrait.jpg";
+import portrait from "@/assets/artist-portrait.png";
 
 export const SITE = {
   tiktok: "https://www.tiktok.com/@swasksah",
