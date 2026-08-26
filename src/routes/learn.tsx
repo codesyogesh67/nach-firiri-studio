@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useUser, useAuth, SignInButton } from "@clerk/clerk-react";
+import { useUser, useAuth, SignInButton } from "@/lib/clerk";
 import { BunnyPlayer } from "@/components/BunnyPlayer";
 import { CoursePaymentModal } from "@/components/CoursePaymentModal";
 import { useState, useEffect } from "react";

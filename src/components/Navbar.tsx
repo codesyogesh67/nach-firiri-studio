@@ -8,7 +8,7 @@ import {
   useUser,
   SignInButton,
   SignOutButton,
-} from "@clerk/clerk-react";
+} from "@/lib/clerk";
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
