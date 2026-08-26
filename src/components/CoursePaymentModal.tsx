@@ -119,7 +119,6 @@ function CheckoutForm({
       <PaymentElement
         options={{
           layout: { type: "tabs", defaultCollapsed: false },
-          wallets: { link: "never" },
         }}
       />
 

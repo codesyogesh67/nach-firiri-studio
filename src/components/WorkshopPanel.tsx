@@ -111,7 +111,7 @@ export function WorkshopPanel({
       setSubject("");
       setMessage("");
     } catch (e) {
-      setSendResult(`❌ ${e.message ?? "Something went wrong"}`);
+      setSendResult(`❌ ${e instanceof Error ? e.message : "Something went wrong"}`);
     } finally {
       setSending(false);
     }

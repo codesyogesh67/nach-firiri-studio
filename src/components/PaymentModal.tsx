@@ -153,7 +153,7 @@ function CheckoutForm({ workshop, attendee, onClose }: {
 
   return (
     <div className="space-y-5">
-      <PaymentElement options={{ layout: { type: "tabs", defaultCollapsed: false }, wallets: { link: "never" } }} />
+      <PaymentElement options={{ layout: { type: "tabs", defaultCollapsed: false } }} />
 
       {error && (
         <motion.p initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }}

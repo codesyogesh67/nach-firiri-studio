@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useAuth } from "@clerk/clerk-react";
+import { useAuth } from "@/lib/clerk";
 
 interface BunnyPlayerProps {
   videoId: string;
