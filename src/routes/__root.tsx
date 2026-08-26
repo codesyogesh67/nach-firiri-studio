@@ -6,7 +6,7 @@ import {
 import { useEffect, type ReactNode } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Toaster } from "sonner";
-import { ClerkProvider } from "@clerk/clerk-react";
+import { AuthProvider } from "../lib/clerk";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -88,7 +88,7 @@ function RootComponent() {
   const isAdmin = pathname === "/admin";
 
   return (
-    <ClerkProvider publishableKey={import.meta.env.VITE_CLERK_PUBLISHABLE_KEY}>
+    <AuthProvider>
       <QueryClientProvider client={queryClient}>
         <LanguageProvider>
           <CustomCursor />
@@ -121,6 +121,6 @@ function RootComponent() {
           />
         </LanguageProvider>
       </QueryClientProvider>
-    </ClerkProvider>
+    </AuthProvider>
   );
 }
